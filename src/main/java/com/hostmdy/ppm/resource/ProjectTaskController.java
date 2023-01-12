@@ -1,8 +1,16 @@
 package com.hostmdy.ppm.resource;
 
+import java.security.Principal;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +25,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/task")
+@CrossOrigin(origins = "http://localhost:3000")
 public class ProjectTaskController {
 	private final ProjectTaskService projectTaskService;
 	private final MapValidationErrorService mapErrorService;
@@ -27,30 +36,48 @@ public class ProjectTaskController {
 		this.mapErrorService = mapErrorService;
 	}
 	
-	@PostMapping("/create")
-	public ResponseEntity<?> createProjectTask(@Valid @RequestBody ProjectTask projectTask,BindingResult result){
-		ResponseEntity<?> errorResponse = mapErrorService.validate(result);
+	@PostMapping("/create/{identifier}")
+	public ResponseEntity<?> createProjectTask(@PathVariable String identifier,@Valid @RequestBody ProjectTask projectTask,BindingResult result,Principal principal){
+		Optional<ResponseEntity<?>> responseErrorObjectOpt = mapErrorService.validate(result);
 		
-		if(errorResponse != null)
-			return errorResponse;
+		if(responseErrorObjectOpt.isPresent())
+			return responseErrorObjectOpt.get();
 		
-		ProjectTask createdProjectTask = projectTaskService.saveOrUpdate(projectTask);
+		ProjectTask createdProjectTask = projectTaskService.createProject(identifier, projectTask, principal.getName());
 	    return new ResponseEntity<ProjectTask>(createdProjectTask,HttpStatus.CREATED);
 	}
-	
-	@PostMapping("/assign/identifier/{identifier}")
-	public ResponseEntity<?> addProjectTaskToBacklog(@PathVariable String identifier,
-			@Valid @RequestBody ProjectTask projectTask,BindingResult result){
-		ResponseEntity<?> errorResponse = mapErrorService.validate(result);
+	@PatchMapping("/update/{identifier}/{sequence}")
+	public ResponseEntity<?> updateProjectTask(@PathVariable String identifier,@PathVariable String sequence,@Valid @RequestBody ProjectTask projectTask,BindingResult result,Principal principal){
+		Optional<ResponseEntity<?>> responseErrorObjectOpt = mapErrorService.validate(result);
 		
-		if(errorResponse != null)
-			return errorResponse;
+		if(responseErrorObjectOpt.isPresent())
+			return responseErrorObjectOpt.get();
 		
-		ProjectTask assignedProjectTask = projectTaskService.addProjectToBacklog(identifier, projectTask);
+		ProjectTask updatedProjectTask = projectTaskService.updateProjectTask(identifier, sequence, projectTask, principal.getName());
+		 return new ResponseEntity<ProjectTask>(updatedProjectTask,HttpStatus.OK);
+		}
+	@GetMapping("/all/{identifier}")
+	public ResponseEntity<?>findAll(@PathVariable String identifier,Principal principal){
+		List<ProjectTask> pTList = projectTaskService.findAll(identifier, principal.getName());
+		if(pTList.isEmpty())
+			return new ResponseEntity<String>("No projects are found in your accounts",HttpStatus.NOT_FOUND);
 		
-		return new ResponseEntity<ProjectTask>(assignedProjectTask,HttpStatus.OK);
-		
+		return new ResponseEntity<List<ProjectTask>>(pTList,HttpStatus.FOUND);
 	}
-	
-	
+	@GetMapping("/{identifier}/{sequence}")
+	public ResponseEntity<?> findByProjectSequence(@PathVariable String identifier,@PathVariable String sequence,Principal principal){
+		Optional<ProjectTask> pTOptional = projectTaskService.findByProjectSequence(identifier, sequence, principal.getName());
+		if(pTOptional.isEmpty())
+			return new ResponseEntity<String>("projectTask with id="+sequence+"is not found",HttpStatus.NOT_FOUND);
+		
+		return new ResponseEntity<ProjectTask>(pTOptional.get(),HttpStatus.FOUND);
+	}
+	@DeleteMapping("/delete/{identifier}/{sequence}")
+	public ResponseEntity<String> deleteProjectTask(@PathVariable String identifier,@PathVariable String sequence,Principal principal){
+		projectTaskService.deleteProjectTask(identifier, sequence, principal.getName());
+		return new ResponseEntity<String>("projectTask with id"+sequence+"is deleted",HttpStatus.OK);
+	}
 }
+	
+	
+

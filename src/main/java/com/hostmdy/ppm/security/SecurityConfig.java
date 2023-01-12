@@ -15,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import com.hostmdy.ppm.service.CustomUserDetailService;
 import com.hostmdy.ppm.service.serviceimpl.CustomUserDetailsService;
 
 @Configuration
@@ -58,6 +59,7 @@ public class SecurityConfig{
 			.headers().frameOptions().sameOrigin()
 			.and()
 			.authorizeHttpRequests()
+//			.requestMatchers("/**").permitAll()
 			.requestMatchers(PUBLIC_MATCHER).permitAll()
 			.requestMatchers(SIGNUP_URL).permitAll()
 //			.requestMatchers(H2_URL).permitAll()

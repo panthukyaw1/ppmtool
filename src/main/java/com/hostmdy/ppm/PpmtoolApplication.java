@@ -1,17 +1,12 @@
 package com.hostmdy.ppm;
 
-import java.time.LocalDate;
-import java.time.Month;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import com.hostmdy.ppm.domain.Backlog;
-import com.hostmdy.ppm.domain.Project;
-import com.hostmdy.ppm.domain.User;
 import com.hostmdy.ppm.service.ProjectService;
 import com.hostmdy.ppm.service.UserService;
 

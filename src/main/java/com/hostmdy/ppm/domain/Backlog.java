@@ -26,7 +26,7 @@ public class Backlog {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
-	private Integer pTSequence;
+	private Integer pTSequence=0;
 	
 	@Column(updatable = false)
 	private String projectIdentifier;
@@ -34,6 +34,8 @@ public class Backlog {
 	@OneToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "project_id"/*,nullable = false*/)
 	private Project project;
+	
+	private String status= "active";
 	
 	@OneToMany(mappedBy = "backlog",cascade = CascadeType.REFRESH,
 			fetch = FetchType.EAGER,orphanRemoval = true)

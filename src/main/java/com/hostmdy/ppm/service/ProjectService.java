@@ -7,14 +7,16 @@ import com.hostmdy.ppm.domain.Project;
 
 public interface ProjectService {
 	
-	Project saveOrUpdate(Project project);
+	Project saveOrUpdate(Project project,String username);
 	
-	List<Project> findAll();
+	List<Project> findAll(String username);
 	
-	Optional<Project>  findById(Long id);
+	Optional<Project> findByIdentifier(String identifier,String username);
 	
-	Optional<Project> findByIdentifier(String identifier);
+	void flashDelete(String identifier,String username);
 	
-	void deleteById(Long id);
+	void deleteProject(String identifier);
+	
+	
 
 }
